@@ -117,6 +117,18 @@ jobs:
           cp "$src" "dist/WhoAmI-${GITHUB_REF_NAME}.apk"
           # sanity: an installable APK must contain a signature block
           if grep -aq "ANDROID" "dist/WhoAmI-${GITHUB_REF_NAME}.apk"; then echo "signature marker present"; fi
+      - name: Verify release signer fingerprint
+        run: |
+          APK="dist/WhoAmI-${GITHUB_REF_NAME}.apk"
+          fp=$(keytool -printcert -jarfile "$APK" 2>/dev/null | grep -m1 "SHA256:" || true)
+          if [ -z "$fp" ]; then
+            APKSIGNER=$(find /usr/local/lib/android/sdk/build-tools -name apksigner 2>/dev/null | sort | tail -1)
+            fp=$(\"$APKSIGNER\" verify --print-certs "$APK" 2>/dev/null | grep -m1 "SHA-256 digest" || true)
+          fi
+          echo "::notice title=release-signer::$fp"
+          echo "$fp" | grep -qi "BB:A8:29:58\|bba82958" \
+            && echo "::notice title=release-signer-check::MATCHES stable keystore ✓" \
+            || { echo "::error title=release-signer-check::RELEASE APK NOT SIGNED WITH STABLE KEYSTORE!"; exit 1; }
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
