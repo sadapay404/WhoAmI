@@ -11,8 +11,8 @@ android {
         applicationId = "com.whoami.guard"
         minSdk = 29
         targetSdk = 35
-        versionCode = 2
-        versionName = "0.2.0-phase2"
+        versionCode = 6
+        versionName = "1.0.0"
     }
 
     buildTypes {

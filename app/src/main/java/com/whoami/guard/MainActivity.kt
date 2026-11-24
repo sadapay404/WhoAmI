@@ -3,11 +3,15 @@ package com.whoami.guard
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
+import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.materialswitch.MaterialSwitch
 import com.whoami.guard.capture.CaptureService
 import com.whoami.guard.guard.GuardService
+import com.whoami.guard.health.HealthReport
+import com.whoami.guard.health.PermissionChecks
 import com.whoami.guard.log.DecisionLog
 import com.whoami.guard.media.WallpaperKeeper
 import com.whoami.guard.prefs.AppPrefs
@@ -23,6 +27,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var homeStatus: TextView
     private lateinit var homeNote: TextView
     private lateinit var logView: TextView
+    private lateinit var healthLine: TextView
+    private lateinit var fixContainer: LinearLayout
+    private lateinit var thresholdText: TextView
     private lateinit var switchWhatsapp: MaterialSwitch
     private lateinit var switchUncertain: MaterialSwitch
     private lateinit var switchArmed: MaterialSwitch
@@ -44,6 +51,9 @@ class MainActivity : AppCompatActivity() {
         homeStatus = findViewById(R.id.homeStatus)
         homeNote = findViewById(R.id.homeNote)
         logView = findViewById(R.id.logView)
+        healthLine = findViewById(R.id.healthLine)
+        fixContainer = findViewById(R.id.fixContainer)
+        thresholdText = findViewById(R.id.thresholdValue)
         switchWhatsapp = findViewById(R.id.switchWhatsapp)
         switchUncertain = findViewById(R.id.switchUncertain)
         switchArmed = findViewById(R.id.switchArmed)
@@ -122,6 +132,33 @@ class MainActivity : AppCompatActivity() {
             logSetting("protection ${if (checked) "armed" else "disarmed"}")
             render()
         }
+
+        // --- threshold tuning (Phase 6) ---
+        findViewById<Button>(R.id.btnThresholdDown).setOnClickListener {
+            prefs.matchThreshold = (prefs.matchThreshold - 0.05f).coerceIn(0.30f, 0.90f)
+            logSetting("threshold → ${"%.2f".format(prefs.matchThreshold)}")
+        }
+        findViewById<Button>(R.id.btnThresholdUp).setOnClickListener {
+            prefs.matchThreshold = (prefs.matchThreshold + 0.05f).coerceIn(0.30f, 0.90f)
+            logSetting("threshold → ${"%.2f".format(prefs.matchThreshold)}")
+        }
+        thresholdText.text = "%.2f".format(prefs.matchThreshold)
+
+        // Long-press headline for the Motorola battery explainer.
+        healthLine.setOnLongClickListener {
+            AlertDialog.Builder(this)
+                .setTitle("Keeping WhoAmI awake")
+                .setMessage(HealthReport.motorolaBatteryGuide())
+                .setPositiveButton("Open battery settings") { _, _ ->
+                    val check = PermissionChecks.Check.BATTERY
+                    if (!PermissionChecks.isOk(this, check)) {
+                        runCatching { startActivity(PermissionChecks.fixIntent(this, check)) }
+                    }
+                }
+                .setNegativeButton("Close", null)
+                .show()
+            true
+        }
     }
 
     override fun onResume() {
@@ -141,6 +178,25 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun render() {
+        // Health report + one-tap fixes
+        val report = HealthReport.build(this, prefs, GuardService.running)
+        healthLine.text = report.headline + "\n" + report.lines.joinToString("\n")
+
+        fixContainer.removeAllViews()
+        for (check in PermissionChecks.Check.entries) {
+            if (PermissionChecks.isOk(this, check)) continue
+            val btn = Button(this).apply {
+                text = check.fixedLabel
+                textSize = 14f
+                setOnClickListener {
+                    runCatching { startActivity(PermissionChecks.fixIntent(this@MainActivity, check)) }
+                }
+            }
+            fixContainer.addView(btn)
+        }
+
+        thresholdText.text = "%.2f".format(prefs.matchThreshold)
+
         val face = if (prefs.faceEnrolled)
             "✓ Face enrolled (${prefs.enrolledSampleCount} samples)" else "○ Face NOT enrolled"
         val wall = if (prefs.wallpaperBackedUp)
@@ -163,7 +219,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         homeNote.text = "Every unlock and WhatsApp open is checked on-device. " +
-            "Scores ≥ threshold = you; below = intruder (capture pipeline lands in Phase 4).\n\n" +
-            "Flip a switch or run a test to generate log lines."
+            "Score ≥ threshold = you; below = intruder → capture + wallpaper swap.\n\n" +
+            "Too many false alarms? Raise the threshold. Missing yourself in the dark? " +
+            "Lower it — or turn off strict mode."
     }
 }
