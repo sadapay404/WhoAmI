@@ -123,7 +123,7 @@ jobs:
           fp=$(keytool -printcert -jarfile "$APK" 2>/dev/null | grep -m1 "SHA256:" || true)
           if [ -z "$fp" ]; then
             APKSIGNER=$(find /usr/local/lib/android/sdk/build-tools -name apksigner 2>/dev/null | sort | tail -1)
-            fp=$(\"$APKSIGNER\" verify --print-certs "$APK" 2>/dev/null | grep -m1 "SHA-256 digest" || true)
+            fp=$("$APKSIGNER" verify --print-certs "$APK" 2>/dev/null | grep -m1 "SHA-256 digest" || true)
           fi
           echo "::notice title=release-signer::$fp"
           echo "$fp" | grep -qi "BB:A8:29:58\|bba82958" \
