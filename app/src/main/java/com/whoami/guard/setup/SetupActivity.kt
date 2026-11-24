@@ -33,6 +33,8 @@ class SetupActivity : AppCompatActivity() {
     private lateinit var skipButton: Button
 
     private var step = 0
+    private var backupInFlight = false
+    private var backupMessage: String? = null
 
     private val runtimePermissions = arrayOf(
         Manifest.permission.CAMERA,
@@ -120,10 +122,18 @@ class SetupActivity : AppCompatActivity() {
             }
             STEP_WALLPAPER -> {
                 if (prefs.wallpaperBackedUp) { step = STEP_DONE; render() }
-                else {
-                    val ok = com.whoami.guard.media.WallpaperKeeper.backup(this)
-                    prefs.wallpaperBackedUp = ok
-                    render()
+                else if (!backupInFlight) {
+                    // Async: compressing a 4K wallpaper on the UI thread froze this step.
+                    backupInFlight = true
+                    nextButton.isEnabled = false
+                    stepStatus.text = "Backing up… (takes a second)"
+                    com.whoami.guard.media.WallpaperKeeper.backupAsync(this) { result ->
+                        backupInFlight = false
+                        nextButton.isEnabled = true
+                        prefs.wallpaperBackedUp = result.ok
+                        backupMessage = result.message
+                        render()
+                    }
                 }
             }
             STEP_DONE -> {
@@ -135,9 +145,10 @@ class SetupActivity : AppCompatActivity() {
     }
 
     private fun onSkip() {
-        // Only the battery step is skippable — everything else is load-bearing.
+        // Battery and wallpaper steps are skippable — everything else is load-bearing.
         when (step) {
             STEP_BATTERY -> { step = STEP_ENROLL; render() }
+            STEP_WALLPAPER -> { step = STEP_DONE; render() }
             else -> onNext()
         }
     }
@@ -209,9 +220,22 @@ class SetupActivity : AppCompatActivity() {
                     "you see it the moment you return.\n\n" +
                     "We'll save your current wallpaper now so we can put it back the second YOU " +
                     "unlock with your face."
-                stepStatus.text = if (prefs.wallpaperBackedUp) "✓ Saved" else "○ Not saved yet"
-                nextButton.text = if (prefs.wallpaperBackedUp) "Next" else "Back up now"
-                skipButton.visibility = android.view.View.GONE
+                stepStatus.text = when {
+                    prefs.wallpaperBackedUp -> "✓ Saved"
+                    backupInFlight -> "Backing up… (takes a second)"
+                    backupMessage != null -> "✗ $backupMessage"
+                    else -> "○ Not saved yet"
+                }
+                nextButton.text = when {
+                    prefs.wallpaperBackedUp -> "Next"
+                    backupInFlight -> "Backing up…"
+                    else -> "Back up now"
+                }
+                // If backup keeps failing, never trap the user — offer skip.
+                skipButton.text = "Skip (use default on restore)"
+                skipButton.visibility =
+                    if (prefs.wallpaperBackedUp || backupInFlight) android.view.View.GONE
+                    else android.view.View.VISIBLE
             }
             STEP_DONE -> {
                 stepTitle.text = "You're protected"

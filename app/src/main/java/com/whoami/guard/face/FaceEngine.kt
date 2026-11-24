@@ -17,7 +17,7 @@ import kotlin.math.sqrt
 /**
  * On-device face engine.
  *
- * Pipeline:  Bitmap → ML Kit (find face) → crop → 112×112 → MobileFaceNet → 192-dim embedding.
+ * Pipeline:  Bitmap → ML Kit (find faces) → crop → 112×112 → MobileFaceNet → 192-dim embedding.
  * Everything runs offline; no network calls, ever.
  */
 class FaceEngine(context: Context) {
@@ -34,7 +34,7 @@ class FaceEngine(context: Context) {
         interpreter = Interpreter(loadModel(context), Interpreter.Options().apply { setNumThreads(4) })
     }
 
-    /** Result of analyzing one photo. */
+    /** Result of analyzing one photo for a single (largest) face — used by enrollment. */
     data class Analysis(
         val faceFound: Boolean,
         val embedding: FloatArray?,
@@ -43,15 +43,43 @@ class FaceEngine(context: Context) {
     )
 
     /**
+     * One detected face with its embedding.
+     * Group-shot matching checks EVERY face against the owner's enrollment.
+     */
+    data class FaceHit(
+        val embedding: FloatArray,
+        val box: Rect,
+        /** face min-side / image min-side, 0..1 — roughly how prominent the face is */
+        val sizeFrac: Float
+    )
+
+    /** Detect ALL faces big enough to be a real person in frame, embed each. Blocking — background thread only. */
+    fun analyzeAll(bitmap: Bitmap, maxFaces: Int = 8): List<FaceHit> {
+        val faces = detectFaces(bitmap)
+            .sortedByDescending { it.boundingBox.width() * it.boundingBox.height() }
+            .take(maxFaces)
+
+        val imgMin = minOf(bitmap.width, bitmap.height).toFloat()
+        val hits = ArrayList<FaceHit>(faces.size)
+        for (face in faces) {
+            val box = padBox(face.boundingBox, bitmap.width, bitmap.height)
+            val minSide = minOf(box.width(), box.height())
+            // Too small = background noise; a real person near the phone is always bigger.
+            if (minSide < imgMin * 0.04f) continue
+            val cropped = Bitmap.createBitmap(bitmap, box.left, box.top, box.width(), box.height())
+            val emb = embed(cropped)
+            cropped.recycle()
+            hits.add(FaceHit(emb, face.boundingBox, minSide / imgMin))
+        }
+        return hits
+    }
+
+    /**
      * Find the most prominent face in [bitmap] and compute its embedding.
      * Blocking (ML Kit Tasks.await) — invoke from a background executor only.
      */
     fun analyze(bitmap: Bitmap): Analysis {
-        val faces = runCatching {
-            com.google.android.gms.tasks.Tasks.await(
-                faceDetector.process(InputImage.fromBitmap(bitmap, 0))
-            )
-        }.getOrDefault(emptyList())
+        val faces = detectFaces(bitmap)
 
         val face = faces.maxByOrNull { it.boundingBox.width() * it.boundingBox.height() }
             ?: return Analysis(false, null, null, false)
@@ -88,12 +116,27 @@ class FaceEngine(context: Context) {
         return dot / (sqrt(na) * sqrt(nb) + 1e-6f)
     }
 
+    /**
+     * Best cosine score of [probe] against every enrolled sample.
+     * Returns -1 when nothing is enrolled.
+     */
+    fun bestMatch(probe: FloatArray, enrolled: List<FloatArray>): Float {
+        if (enrolled.isEmpty()) return -1f
+        return enrolled.maxOf { similarity(probe, it) }
+    }
+
     fun close() {
         interpreter.close()
         faceDetector.close()
     }
 
     // --- internals -------------------------------------------------------
+
+    private fun detectFaces(bitmap: Bitmap): List<Face> = runCatching {
+        com.google.android.gms.tasks.Tasks.await(
+            faceDetector.process(InputImage.fromBitmap(bitmap, 0))
+        )
+    }.getOrDefault(emptyList())
 
     private fun qualityOk(face: Face, box: Rect, source: Bitmap): Boolean {
         // Reject tiny faces (someone in the far background) and dead-dark shots.

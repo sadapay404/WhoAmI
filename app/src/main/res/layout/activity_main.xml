@@ -162,7 +162,7 @@
                 android:id="@+id/switchUncertain"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Capture even when face is unclear (strict)"
+                android:text="If you don't appear within 10 seconds → capture"
                 android:textSize="14sp" />
 
             <com.google.android.material.materialswitch.MaterialSwitch

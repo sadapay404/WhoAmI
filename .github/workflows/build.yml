@@ -55,6 +55,21 @@ jobs:
           cp app/build/outputs/apk/debug/app-debug.apk "dist/WhoAmI-${SHA}.apk"
           cp app/build/outputs/apk/debug/app-debug.apk dist/WhoAmI-latest.apk
 
+      # Print the signer fingerprint so consecutive builds can be compared:
+      # it must be identical across runs (stable committed keystore).
+      - name: Verify signer fingerprint
+        run: |
+          fp=$(keytool -printcert -jarfile app/build/outputs/apk/debug/app-debug.apk 2>/dev/null | grep -m1 "SHA256:" || true)
+          if [ -z "$fp" ]; then
+            APKSIGNER=$(find /usr/local/lib/android/sdk/build-tools -name apksigner 2>/dev/null | sort | tail -1)
+            fp=$("$APKSIGNER" verify --print-certs app/build/outputs/apk/debug/app-debug.apk 2>/dev/null | grep -m1 "SHA-256 digest" || true)
+          fi
+          echo "::notice title=signer::$fp"
+          # Expected: the committed keystore's fingerprint (BB:A8:29:58:...)
+          echo "$fp" | grep -qi "BB:A8:29:58\|bba82958" \
+            && echo "::notice title=signer-check::MATCHES stable keystore ✓" \
+            || { echo "::error title=signer-check::DOES NOT match stable keystore!"; exit 1; }
+
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:

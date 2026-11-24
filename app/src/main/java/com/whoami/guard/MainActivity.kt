@@ -77,10 +77,18 @@ class MainActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btnReenroll).setOnClickListener {
             startActivity(Intent(this, EnrollFaceActivity::class.java))
         }
-        findViewById<Button>(R.id.btnResetwork).setOnClickListener {
-            val ok = WallpaperKeeper.backup(this)
-            prefs.wallpaperBackedUp = ok
-            render()
+        findViewById<Button>(R.id.btnResetwork).setOnClickListener { btn ->
+            btn.isEnabled = false
+            WallpaperKeeper.backupAsync(this) { result ->
+                prefs.wallpaperBackedUp = result.ok
+                btn.isEnabled = true
+                android.widget.Toast.makeText(
+                    this,
+                    if (result.ok) "Wallpaper saved" else "Failed: ${result.message}",
+                    android.widget.Toast.LENGTH_LONG
+                ).show()
+                render()
+            }
         }
         findViewById<Button>(R.id.btnClearLog).setOnClickListener {
             DecisionLog.clear(this)

@@ -134,8 +134,8 @@ class GuardService : Service() {
         if (now - lastCheckAt < DEBOUNCE_MS) return
         lastCheckAt = now
 
-        // Never interrupt an active capture session.
-        if (GuardServiceBridge.captureActive) return
+        // Never interrupt an active capture session or an in-flight grace check.
+        if (GuardServiceBridge.captureActive || GuardServiceBridge.checkActive) return
 
         // Don't check when our own app is open (enrollment, test screen, home).
         if (foregroundPackage() == packageName) return

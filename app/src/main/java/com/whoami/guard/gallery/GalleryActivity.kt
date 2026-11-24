@@ -47,21 +47,23 @@ class GalleryActivity : AppCompatActivity() {
         val restoreBtn = findViewById<Button>(R.id.galleryRestore)
         if (prefs.wallpaperSwapped) {
             restoreBtn.visibility = View.VISIBLE
-            restoreBtn.setOnClickListener {
-                val ok = WallpaperKeeper.restore(this)
-                prefs.wallpaperSwapped = false
-                Toast.makeText(
-                    this,
-                    if (ok) "Wallpaper restored" else "Couldn't restore wallpaper",
-                    Toast.LENGTH_SHORT
-                ).show()
-                if (ok) {
-                    DecisionLog.append(
-                        this, DecisionLog.Trigger.MANUAL,
-                        DecisionLog.Outcome.INFO, "wallpaper restored manually"
-                    )
+            restoreBtn.setOnClickListener { btn ->
+                btn.isEnabled = false
+                WallpaperKeeper.restoreAsync(this) { ok ->
+                    prefs.wallpaperSwapped = false
+                    Toast.makeText(
+                        this,
+                        if (ok) "Wallpaper restored" else "Couldn't restore wallpaper",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    if (ok) {
+                        DecisionLog.append(
+                            this, DecisionLog.Trigger.MANUAL,
+                            DecisionLog.Outcome.INFO, "wallpaper restored manually"
+                        )
+                    }
+                    finish()
                 }
-                finish()
             }
         } else {
             restoreBtn.visibility = View.GONE

@@ -3,6 +3,12 @@ plugins {
     id("org.jetbrains.kotlin.android")
 }
 
+// Stable sideload identity: committed keystore so EVERY build (CI + local)
+// signs with the same certificate → future APKs update in place, no uninstall.
+// Previous builds used GitHub's ephemeral per-run debug key (random each time),
+// which is why older installs can't be upgraded in place.
+val stableKeystore = rootProject.file("keystore/whoami-ci.jks")
+
 android {
     namespace = "com.whoami.guard"
     compileSdk = 35
@@ -11,16 +17,35 @@ android {
         applicationId = "com.whoami.guard"
         minSdk = 29
         targetSdk = 35
-        versionCode = 6
-        versionName = "1.0.0"
+        versionCode = 7
+        versionName = "1.1.0"
+    }
+
+    signingConfigs {
+        if (stableKeystore.exists()) {
+            create("stable") {
+                storeFile = stableKeystore
+                storePassword = "whoami2026"
+                keyAlias = "whoami"
+                keyPassword = "whoami2026"
+            }
+        }
     }
 
     buildTypes {
+        debug {
+            if (stableKeystore.exists()) {
+                signingConfig = signingConfigs.getByName("stable")
+            }
+        }
         release {
             isMinifyEnabled = false
-            // Personal sideload app: sign release with the debug keystore so the
-            // APK is installable and upgrade-compatible with debug builds.
-            signingConfig = signingConfigs.getByName("debug")
+            if (stableKeystore.exists()) {
+                signingConfig = signingConfigs.getByName("stable")
+            } else {
+                // Fallback for clones without the keystore: local debug key.
+                signingConfig = signingConfigs.getByName("debug")
+            }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

@@ -3,11 +3,17 @@
 ## Install
 
 1. Open the repo's **Releases** page on your phone.
-2. Download **WhoAmI-latest.apk** (or a tagged release like `WhoAmI-v1.0.apk`).
+2. Download **WhoAmI-latest.apk** (or a tagged release like `WhoAmI-v1.1.apk`).
 3. Open the file → Android asks to allow installs from your browser/file manager → Allow → Install.
 
 > Builds are debug-key signed, which is normal for a personal sideloaded app. Android
 > 14+ may warn "unsafe app" because it wasn't installed from Play — tap *Install anyway*.
+
+> **One-time note (v1.1+):** builds up to v1.0 were signed with a throwaway key that
+> GitHub regenerated on every build (that's why they couldn't update each other).
+> From v1.1 on, one permanent key is committed to the repo, so **all future updates
+> install in place**. If you still have a ≤v1.0 build installed, Android will refuse
+> the upgrade — **uninstall once, install v1.1, then never again.**
 
 ## First-time setup (about 3 minutes)
 
@@ -27,6 +33,11 @@ The app opens a 7-step wizard. Each step explains itself; the short version:
 
 - **Lock and unlock your phone.** The home screen's RECENT CHECKS log shows every
   decision with a score: `MATCH` = it believed you, `NO_MATCH` = capture ran.
+- **Group unlocks are safe:** every face in the photo is checked against yours —
+  if YOU are among friends in frame, it's a MATCH and nothing captures.
+- **If nobody (or no you) is visible at unlock,** the check keeps watching for
+  **10 seconds**. The moment your face appears → MATCH. If you still haven't
+  appeared after 10 s → capture runs (toggleable in settings).
 - **Open WhatsApp** — same check happens there (toggleable in settings).
 - **When a capture happens:** front/back photos, a 5-second video of each camera
   (back video with sound), and microphone audio until you lock the phone. Your

@@ -24,12 +24,14 @@ class AppPrefs(context: Context) {
         set(value) = prefs.edit().putBoolean(KEY_WALLPAPER_BACKUP, value).apply()
 
     /**
-     * What to do when the face check cannot decide (dark room, odd angle).
-     * "allow"  = let the person through (default — phone is already unlocked anyway)
-     * "capture = treat uncertainty as an intruder
+     * What to do when the owner never appears within the 10-second grace period
+     * (nobody visible, dark room, only strangers' faces).
+     * "capture" = fire the capture pipeline (default — spec: "if I don't appear
+     *             for 10 seconds at least, click")
+     * "allow"   = let it slide; only strict group matches capture
      */
     var uncertainPolicy: String
-        get() = prefs.getString(KEY_UNCERTAIN_POLICY, POLICY_ALLOW) ?: POLICY_ALLOW
+        get() = prefs.getString(KEY_UNCERTAIN_POLICY, POLICY_CAPTURE) ?: POLICY_CAPTURE
         set(value) = prefs.edit().putString(KEY_UNCERTAIN_POLICY, value).apply()
 
     var whatsappCheckEnabled: Boolean

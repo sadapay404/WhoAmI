@@ -1,5 +1,20 @@
 # WhoAmI — Masterplan
 
+> **Revision round 1 (2026-11-24) — user feedback implemented in v1.1:**
+> 1. **Group unlocks:** face check now tests EVERY face in the photo against the
+>    owner's enrollment — owner among friends = MATCH, never captures.
+> 2. **10-second grace:** if the owner isn't seen at unlock, the check keeps
+>    sampling the front camera for 10 s; owner appears → MATCH; owner never
+>    appears → capture (toggle in settings, default ON).
+> 3. **Wallpaper backup freeze fixed:** setup step 6 compressed a 4K wallpaper
+>    on the UI thread. Now async (background thread), JPEG instead of PNG,
+>    downscaled ≤4096px, with a visible error + Skip option for live wallpapers.
+> 4. **Signing key stabilized:** probe proved every CI build had signed with a
+>    different ephemeral key (three published APKs = three fingerprints). A
+>    permanent keystore (`keystore/whoami-ci.jks`) is now committed and used by
+>    every build (CI verifies the fingerprint each run). ≤v1.0 installs need one
+>    final uninstall; every update after that installs in place.
+
 > **Goal (your words):** Every time my phone unlocks OR WhatsApp opens, and it's NOT me —
 > capture a front photo, back photo, 5s front video, 5s back video with audio, and audio for
 > the whole session until I lock the phone again. The front photo becomes my wallpaper until

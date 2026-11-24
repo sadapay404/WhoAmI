@@ -113,7 +113,7 @@ class TestCheckActivity : AppCompatActivity() {
                                 Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, m, true)
                             } else bitmap
 
-                            val analysis = engine.analyze(upright)
+                            val hits = engine.analyzeAll(upright)
                             if (upright !== bitmap) upright.recycle()
                             bitmap.recycle()
 
@@ -124,22 +124,20 @@ class TestCheckActivity : AppCompatActivity() {
                                         resultText.text = "NO FACE ENROLLED"
                                         scoreText.text = "Run setup first"
                                     }
-                                    !analysis.faceFound -> {
+                                    hits.isEmpty() -> {
                                         resultText.text = "NO FACE FOUND"
                                         scoreText.text = "Move into frame"
                                     }
-                                    analysis.embedding == null -> {
-                                        resultText.text = "CAN'T READ FACE"
-                                        scoreText.text = "Try better light"
-                                    }
                                     else -> {
-                                        val best = enrollment.embeddings
-                                            .maxOf { engine.similarity(analysis.embedding!!, it) }
+                                        // Every face is checked — owner among friends = MATCH.
+                                        val best = hits.maxOf {
+                                            engine.bestMatch(it.embedding, enrollment.embeddings)
+                                        }
                                         val match = best >= prefs.matchThreshold
                                         resultText.text = if (match) "MATCH — it's you" else "NO MATCH"
                                         scoreText.text = String.format(
-                                            "score %.3f  ·  threshold %.2f",
-                                            best, prefs.matchThreshold
+                                            "best of %d face(s): %.3f  ·  threshold %.2f",
+                                            hits.size, best, prefs.matchThreshold
                                         )
                                     }
                                 }
