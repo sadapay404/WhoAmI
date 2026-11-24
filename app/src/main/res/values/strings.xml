@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">WhoAmI</string>
+    <string name="phase1_placeholder">Phase 1 of 6 — build machine online.\n\nThe setup wizard, face enrollment, and capture engine arrive in later phases.</string>
+    <string name="version_label">Version %1$s</string>
+</resources>
