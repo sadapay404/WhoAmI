@@ -62,14 +62,17 @@ jobs:
           if-no-files-found: error
 
       - name: Attach to rolling latest-build release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: latest-build
-          name: Latest Debug Build
-          prerelease: true
-          files: |
-            dist/WhoAmI-latest.apk
-            dist/WhoAmI-*.apk
-          body: |
-            Automatic debug build from CI.
-            Install on your phone: download **WhoAmI-latest.apk**, open it, allow "install unknown apps" for your browser/file manager.
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view latest-build --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            gh release upload latest-build dist/*.apk --repo "$GITHUB_REPOSITORY" --clobber
+          else
+            gh release create latest-build dist/*.apk \
+              --repo "$GITHUB_REPOSITORY" \
+              --prerelease \
+              --title "Latest Debug Build" \
+              --notes "Automatic debug build from CI. Download WhoAmI-latest.apk, open it on your phone, allow install from your browser."
+          fi
+          echo "Release updated:" 
+          gh release view latest-build --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name'
