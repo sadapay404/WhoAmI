@@ -124,13 +124,14 @@ You'll tap through, in order:
 > Progress checkboxes live here. If you're offline, I move through them in order and
 > leave notes in §6.
 
-### Phase 1 — Skeleton + build machine
+### Phase 1 — Skeleton + build machine ✅ (2026-11-24)
 **Goal:** an APK exists and installs on your phone.
-- [ ] Kotlin/Gradle project structure in this repo
-- [ ] GitHub Actions workflow: every push → builds a debug APK automatically
-- [ ] APK attached to a rolling GitHub Release (`latest-build`) so you can download it on your phone
-- [ ] Placeholder screen showing app name + version
+- [x] Kotlin/Gradle project structure in this repo
+- [x] GitHub Actions workflow: every push → builds a debug APK automatically
+- [x] APK attached to a rolling GitHub Release (`latest-build`) so you can download it on your phone
+- [x] Placeholder screen showing app name + version
 - **You're needed:** download the APK, install it, confirm it opens. (Everything else can proceed without you.)
+- **APK:** https://github.com/sadapay404/WhoAmI/releases/tag/latest-build (`WhoAmI-latest.apk`, ~12.6 MB)
 
 ### Phase 2 — Setup wizard + permissions + face enrollment
 **Goal:** app is fully configured on your phone and knows your face.
@@ -182,6 +183,8 @@ You'll tap through, in order:
 *(I append here each time I finish a chunk while you're away.)*
 
 - **2026-11-24 — Plan created.** Architecture locked per §2–§3. Starting Phase 1.
+- **2026-11-24 — Phase 1 done.** First CI build green (2m15s). APK attached to release `latest-build`.
+  Next: Phase 2 — setup wizard, permissions, face enrollment.
 
 ---
 

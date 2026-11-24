@@ -1,35 +1,94 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center"
-    android:padding="32dp">
+    android:fillViewport="true">
 
-    <TextView
-        android:id="@+id/appTitle"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/app_name"
-        android:textSize="40sp"
-        android:textStyle="bold" />
+        android:orientation="vertical"
+        android:padding="28dp">
 
-    <TextView
-        android:id="@+id/phaseText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:gravity="center"
-        android:text="@string/phase1_placeholder"
-        android:textSize="16sp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/app_name"
+            android:textSize="34sp"
+            android:textStyle="bold" />
 
-    <TextView
-        android:id="@+id/versionText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="@string/version_label"
-        android:textSize="13sp"
-        android:alpha="0.6" />
+        <TextView
+            android:id="@+id/homeStatus"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:textSize="15sp"
+            android:textColor="#B3FFFFFF"
+            android:text="" />
 
-</LinearLayout>
+        <!-- Status card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:orientation="vertical"
+            android:padding="20dp"
+            android:background="#14FFFFFF">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="STATUS"
+                android:textSize="12sp"
+                android:letterSpacing="0.15"
+                android:textColor="#E94560"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/statusLine"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:textSize="15sp"
+                android:lineSpacingMultiplier="1.5"
+                android:text="" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btnTestCheck"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Test face check"
+            android:textSize="16sp" />
+
+        <Button
+            android:id="@+id/btnReenroll"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:backgroundTint="#33FFFFFF"
+            android:text="Re-enroll face"
+            android:textSize="15sp" />
+
+        <Button
+            android:id="@+id/btnResetwork"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:backgroundTint="#33FFFFFF"
+            android:text="Re-save wallpaper"
+            android:textSize="15sp" />
+
+        <TextView
+            android:id="@+id/homeNote"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:textSize="13sp"
+            android:textColor="#80FFFFFF"
+            android:lineSpacingMultiplier="1.4"
+            android:text="" />
+
+    </LinearLayout>
+</ScrollView>
