@@ -4,6 +4,9 @@ name: Probe signing keys
 # which would make every published APK un-installable over the previous one.)
 on:
   workflow_dispatch:
+  push:
+    branches: ["arena/973c69c1-whoami"]
+    paths: [".github/workflows/probe.yml"]
 
 permissions:
   contents: read
