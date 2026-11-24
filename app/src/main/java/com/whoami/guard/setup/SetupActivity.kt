@@ -161,7 +161,7 @@ class SetupActivity : AppCompatActivity() {
                     "Camera", hasPermission(Manifest.permission.CAMERA),
                     "Microphone", hasPermission(Manifest.permission.RECORD_AUDIO)
                 )
-                nextButton.text = if (allRuntimeGranted()) "Next" : "Grant permissions"
+                nextButton.text = if (allRuntimeGranted()) "Next" else "Grant permissions"
                 skipButton.visibility = android.view.View.GONE
             }
             STEP_OVERLAY -> {
@@ -170,7 +170,7 @@ class SetupActivity : AppCompatActivity() {
                     "before anyone can open anything.\n\n" +
                     "Android will open a settings screen. Find WhoAmI in the list and turn it ON."
                 stepStatus.text = if (hasOverlay()) "✓ Granted" else "○ Not granted yet"
-                nextButton.text = if (hasOverlay()) "Next" : "Open settings"
+                nextButton.text = if (hasOverlay()) "Next" else "Open settings"
                 skipButton.visibility = android.view.View.GONE
             }
             STEP_USAGE -> {
@@ -179,7 +179,7 @@ class SetupActivity : AppCompatActivity() {
                     "same face-check there too.\n\n" +
                     "Android will open a settings screen. Find WhoAmI and allow usage access."
                 stepStatus.text = if (hasUsageAccess()) "✓ Granted" else "○ Not granted yet"
-                nextButton.text = if (hasUsageAccess()) "Next" : "Open settings"
+                nextButton.text = if (hasUsageAccess()) "Next" else "Open settings"
                 skipButton.visibility = android.view.View.GONE
             }
             STEP_BATTERY -> {
@@ -188,7 +188,7 @@ class SetupActivity : AppCompatActivity() {
                     "WhoAmI must never be killed or it can't watch.\n\n" +
                     "On the next screen, choose Unrestricted / Allow."
                 stepStatus.text = if (hasBatteryExemption()) "✓ Unrestricted" else "○ Still restricted"
-                nextButton.text = if (hasBatteryExemption()) "Next" : "Open battery settings"
+                nextButton.text = if (hasBatteryExemption()) "Next" else "Open battery settings"
                 skipButton.text = "Skip for now"
                 skipButton.visibility = android.view.View.VISIBLE
             }
