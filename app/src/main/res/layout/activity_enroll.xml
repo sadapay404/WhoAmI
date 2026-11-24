@@ -17,7 +17,7 @@
 
     <!-- Bottom scrim with instructions -->
     <LinearLayout
-        android:id="bottomBar"
+        android:id="@+id/bottomBar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"

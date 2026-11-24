@@ -44,9 +44,9 @@ class FaceEngine(context: Context) {
 
     /**
      * Find the most prominent face in [bitmap] and compute its embedding.
-     * Synchronous on the calling thread — invoke from a background executor.
+     * Blocking (ML Kit Tasks.await) — invoke from a background executor only.
      */
-    suspend fun analyze(bitmap: Bitmap): Analysis {
+    fun analyze(bitmap: Bitmap): Analysis {
         val faces = runCatching {
             com.google.android.gms.tasks.Tasks.await(
                 faceDetector.process(InputImage.fromBitmap(bitmap, 0))

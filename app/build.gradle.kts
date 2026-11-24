@@ -53,7 +53,8 @@ dependencies {
     implementation("androidx.camera:camera-view:1.4.1")
 
     // ML Kit face detection — bundled model, works fully offline
-    implementation("com.google.mlkit:face-detection:16.1.6")
+    implementation("com.google.mlkit:face-detection:16.1.5")
+    implementation("com.google.android.gms:play-services-tasks:18.2.0")
 
     // TensorFlow Lite — runs MobileFaceNet embeddings on-device
     implementation("org.tensorflow:tensorflow-lite:2.16.1")

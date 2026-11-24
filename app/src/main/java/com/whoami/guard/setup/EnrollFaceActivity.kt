@@ -38,6 +38,7 @@ class EnrollFaceActivity : AppCompatActivity() {
     private lateinit var prefs: AppPrefs
 
     private val captureExecutor = Executors.newSingleThreadExecutor()
+    private val analysisExecutor = Executors.newSingleThreadExecutor()
     private var imageCapture: ImageCapture? = null
     private val embeddings = mutableListOf<FloatArray>()
     private var capturing = false
@@ -108,7 +109,9 @@ class EnrollFaceActivity : AppCompatActivity() {
                     ContextCompat.getMainExecutor(this),
                     object : ImageCapture.OnImageCapturedCallback() {
                         override fun onCaptureSuccess(image: ImageProxy) {
-                            captureExecutor.execute {
+                            // Analyze on a DIFFERENT thread than the one blocked on the
+                            // latch — same-executor submission would deadlock.
+                            analysisExecutor.execute {
                                 try {
                                     analyzed = processImage(image)
                                 } finally {
@@ -133,6 +136,7 @@ class EnrollFaceActivity : AppCompatActivity() {
         // Done — report back on the main thread.
         runOnUiThread {
             capturing = false
+            if (isFinishing || isDestroyed) return@runOnUiThread
             if (embeddings.size >= MIN_SAMPLES) {
                 store.save(embeddings)
                 prefs.faceEnrolled = true
@@ -188,6 +192,7 @@ class EnrollFaceActivity : AppCompatActivity() {
         super.onDestroy()
         capturing = false
         captureExecutor.shutdownNow()
+        analysisExecutor.shutdownNow()
         engine.close()
     }
 
