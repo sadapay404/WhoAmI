@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
@@ -138,9 +137,6 @@ class QuietCheckActivity : AppCompatActivity() {
             } else bitmap
 
             val analysis = engine.analyze(upright)
-            if (upright !== bitmap) upright.recycle()
-            bitmap.recycle()
-
             val enrollment = store.load()
             when {
                 enrollment == null -> {
@@ -156,7 +152,9 @@ class QuietCheckActivity : AppCompatActivity() {
                         this, trigger, DecisionLog.Outcome.UNCERTAIN,
                         "no clear face → policy=$policy"
                     )
-                    if (policy == AppPrefs.POLICY_CAPTURE) onIntruder(trigger)
+                    if (policy == AppPrefs.POLICY_CAPTURE) {
+                        onIntruder(trigger, upright)
+                    }
                 }
                 else -> {
                     val emb = analysis.embedding
@@ -172,10 +170,12 @@ class QuietCheckActivity : AppCompatActivity() {
                         DecisionLog.append(
                             this, trigger, DecisionLog.Outcome.NO_MATCH, detail
                         )
-                        onIntruder(trigger)
+                        onIntruder(trigger, upright)
                     }
                 }
             }
+            if (upright !== bitmap) upright.recycle()
+            bitmap.recycle()
         } catch (e: Exception) {
             Log.e(TAG, "analysis failed", e)
             DecisionLog.append(
@@ -202,10 +202,38 @@ class QuietCheckActivity : AppCompatActivity() {
         }
     }
 
-    private fun onIntruder(trigger: DecisionLog.Trigger) {
-        // Full capture pipeline arrives in Phase 4 — for now, flag the event.
+    private fun onIntruder(trigger: DecisionLog.Trigger, frontBitmap: Bitmap?) {
         GuardServiceBridge.lastIntruderTrigger = trigger
-        Toast.makeText(this, "⚠ Not you — capture runs from Phase 4", Toast.LENGTH_SHORT).show()
+        GuardServiceBridge.captureActive = true
+
+        // 1. Open a session folder and stash the front photo (the check shot).
+        val session = com.whoami.guard.media.SessionStore.createSession(this, trigger)
+        if (frontBitmap != null) {
+            com.whoami.guard.media.SessionStore.saveJpeg(session, "front.jpg", frontBitmap)
+        }
+
+        // 2. Swap wallpaper to the intruder's photo — instantly, per spec.
+        if (frontBitmap != null) {
+            val ok = WallpaperKeeper.setAsWallpaper(this, frontBitmap)
+            prefs.wallpaperSwapped = ok
+            DecisionLog.append(
+                this, trigger, DecisionLog.Outcome.INFO,
+                if (ok) "wallpaper swapped to intruder photo"
+                else "wallpaper swap FAILED"
+            )
+        }
+
+        // 3. Hand off to the capture pipeline (still on screen → legal FGS start).
+        runCatching {
+            com.whoami.guard.capture.CaptureService.start(this, session, trigger)
+        }.onFailure { e ->
+            Log.e(TAG, "capture service failed to start", e)
+            GuardServiceBridge.captureActive = false
+            DecisionLog.append(
+                this, trigger, DecisionLog.Outcome.ERROR,
+                "capture start: ${e.message}"
+            )
+        }
     }
 
     private fun finishSoon() {

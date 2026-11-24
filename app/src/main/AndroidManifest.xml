@@ -80,6 +80,12 @@
                 android:value="Listens for device unlock and WhatsApp foreground events to run an on-device face check for the phone owner's security." />
         </service>
 
+        <!-- Intruder capture pipeline: photos, videos, session audio -->
+        <service
+            android:name=".capture.CaptureService"
+            android:exported="false"
+            android:foregroundServiceType="camera|microphone" />
+
         <!-- Re-arm after reboot -->
         <receiver
             android:name=".guard.BootReceiver"

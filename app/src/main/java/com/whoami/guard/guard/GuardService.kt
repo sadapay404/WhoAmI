@@ -23,6 +23,7 @@ import com.whoami.guard.MainActivity
 import com.whoami.guard.R
 import com.whoami.guard.log.DecisionLog
 import com.whoami.guard.prefs.AppPrefs
+import com.whoami.guard.setup.GuardServiceBridge
 import com.whoami.guard.setup.QuietCheckActivity
 
 /**
@@ -132,6 +133,9 @@ class GuardService : Service() {
         val now = System.currentTimeMillis()
         if (now - lastCheckAt < DEBOUNCE_MS) return
         lastCheckAt = now
+
+        // Never interrupt an active capture session.
+        if (GuardServiceBridge.captureActive) return
 
         // Don't check when our own app is open (enrollment, test screen, home).
         if (foregroundPackage() == packageName) return

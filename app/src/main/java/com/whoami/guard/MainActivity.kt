@@ -6,6 +6,7 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.materialswitch.MaterialSwitch
+import com.whoami.guard.capture.CaptureService
 import com.whoami.guard.guard.GuardService
 import com.whoami.guard.log.DecisionLog
 import com.whoami.guard.media.WallpaperKeeper
@@ -73,6 +74,24 @@ class MainActivity : AppCompatActivity() {
         }
         findViewById<Button>(R.id.btnClearLog).setOnClickListener {
             DecisionLog.clear(this)
+            render()
+        }
+
+        // Phase 4 test hook: run the full capture pipeline without needing
+        // a real face mismatch. Safe to use anytime; files land in the session list.
+        findViewById<Button>(R.id.btnSimulate).setOnClickListener {
+            DecisionLog.append(
+                this, DecisionLog.Trigger.MANUAL, DecisionLog.Outcome.INFO,
+                "SIMULATED intruder (manual test)"
+            )
+            runCatching {
+                CaptureService.startSimulated(this, DecisionLog.Trigger.MANUAL)
+            }.onFailure { e ->
+                DecisionLog.append(
+                    this, DecisionLog.Trigger.MANUAL, DecisionLog.Outcome.ERROR,
+                    "simulate failed: ${e.message}"
+                )
+            }
             render()
         }
 

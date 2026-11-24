@@ -142,12 +142,12 @@ You'll tap through, in order:
 - [x] "Test face check" button (runs the check and tells you MATCH / NO MATCH + score)
 - **You're needed:** run setup on the phone, enroll your face, tap Test a few times (daylight + a dark room).
 
-### Phase 3 — Detection engine
+### Phase 3 — Detection engine ✅ (2026-11-24)
 **Goal:** the app correctly decides "me" vs "not me" on real unlocks and WhatsApp opens.
-- [ ] Guard Service listening for unlock + WhatsApp foreground
-- [ ] Quiet face-check flow wired to both triggers
-- [ ] Decision log (visible in-app: "14:32 — unlocked — MATCH — allowed")
-- [ ] Settings: allow/deny-on-uncertain toggle, WhatsApp check on/off
+- [x] Guard Service listening for unlock + WhatsApp foreground
+- [x] Quiet face-check flow wired to both triggers
+- [x] Decision log (visible in-app: "14:32 — unlocked — MATCH — allowed")
+- [x] Settings: allow/deny-on-uncertain toggle, WhatsApp check on/off, master arm switch
 - **You're needed:** live with it 1–2 days, confirm the log matches reality.
 
 ### Phase 4 — Intruder capture
@@ -190,6 +190,10 @@ You'll tap through, in order:
   Fixed: 4 Java-style ternaries in Kotlin, a suspend/non-suspend mismatch, an enrollment
   latch deadlock (same-executor submission).
   Next: Phase 3 — Guard Service + quiet face check on unlock and WhatsApp.
+- **2026-11-24 — Phase 3 done.** GuardService (specialUse FGS) + transparent QuietCheckActivity
+  + persistent DecisionLog + home-screen log/toggles + BootReceiver + AlertNotifier channel.
+  Wallpaper-restore-on-owner path wired (uses Phase 4's wallpaperSwapped flag).
+  Next: Phase 4 — capture pipeline (photos, videos, session audio, wallpaper swap).
 
 ---
 
