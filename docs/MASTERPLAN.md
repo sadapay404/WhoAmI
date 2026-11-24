@@ -150,14 +150,14 @@ You'll tap through, in order:
 - [x] Settings: allow/deny-on-uncertain toggle, WhatsApp check on/off, master arm switch
 - **You're needed:** live with it 1–2 days, confirm the log matches reality.
 
-### Phase 4 — Intruder capture
+### Phase 4 — Intruder capture ✅ (2026-11-24)
 **Goal:** full capture chain fires when a face doesn't match.
-- [ ] Front photo, back photo, 5s front video, 5s back video with audio
-- [ ] Session audio from trigger → screen off
-- [ ] Everything saved into a private session folder + info file
-- [ ] Front photo set as wallpaper on capture start
-- [ ] Storage cap: keep last 50 sessions
-- **You're needed:** tap "Simulate intruder" (I'll add it) and verify all 5 media items appear.
+- [x] Front photo, back photo, 5s front video, 5s back video with audio
+- [x] Session audio from trigger → screen off
+- [x] Everything saved into a private session folder + info file
+- [x] Front photo set as wallpaper on capture start
+- [x] Storage cap: keep last 50 sessions
+- **You're needed:** tap "Simulate intruder" and verify all 5 media items appear.
 
 ### Phase 5 — Owner's return (wallpaper restore + notification + gallery)
 **Goal:** the full loop from your description works end-to-end.
@@ -193,7 +193,11 @@ You'll tap through, in order:
 - **2026-11-24 — Phase 3 done.** GuardService (specialUse FGS) + transparent QuietCheckActivity
   + persistent DecisionLog + home-screen log/toggles + BootReceiver + AlertNotifier channel.
   Wallpaper-restore-on-owner path wired (uses Phase 4's wallpaperSwapped flag).
-  Next: Phase 4 — capture pipeline (photos, videos, session audio, wallpaper swap).
+- **2026-11-24 — Phase 4 done.** CaptureService (own LifecycleOwner for headless CameraX),
+  SessionStore (50-session cap, meta.json), wallpaper swap at capture start, simulate button.
+  Fixed: missing `import android.app.Service`; release step moved to `gh` CLI after
+  softprops action 404'd on asset replacement.
+  Next: Phase 5 — gallery, notification tap-through, restore loop.
 
 ---
 

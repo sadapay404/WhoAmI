@@ -10,7 +10,6 @@ import android.content.pm.PackageManager
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
-import com.whoami.guard.MainActivity
 import com.whoami.guard.R
 
 /**
@@ -31,8 +30,8 @@ object AlertNotifier {
 
         val pending = PendingIntent.getActivity(
             context, 1,
-            Intent(context, MainActivity::class.java).apply {
-                putExtra(MainActivity.EXTRA_SHOW_CAPTURES, true)
+            Intent(context, com.whoami.guard.gallery.GalleryActivity::class.java).apply {
+                putExtra(com.whoami.guard.gallery.GalleryActivity.EXTRA_FROM_NOTIFICATION, true)
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             },
             PendingIntent.FLAG_IMMUTABLE

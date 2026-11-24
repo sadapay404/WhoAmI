@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Session captures: photos, videos, audio (app-private dir) -->
+    <files-path
+        name="sessions"
+        path="sessions/" />
+</paths>

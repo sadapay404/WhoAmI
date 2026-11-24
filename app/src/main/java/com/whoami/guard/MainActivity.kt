@@ -95,6 +95,10 @@ class MainActivity : AppCompatActivity() {
             render()
         }
 
+        findViewById<Button>(R.id.btnViewCaptures).setOnClickListener {
+            startActivity(Intent(this, com.whoami.guard.gallery.GalleryActivity::class.java))
+        }
+
         // --- settings ---
         switchWhatsapp.isChecked = prefs.whatsappCheckEnabled
         switchWhatsapp.setOnCheckedChangeListener { _, checked ->

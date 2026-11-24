@@ -130,6 +130,15 @@
             android:text="⚠ Simulate intruder (test capture)"
             android:textSize="15sp" />
 
+        <Button
+            android:id="@+id/btnViewCaptures"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:backgroundTint="#33FFFFFF"
+            android:text="View captured sessions"
+            android:textSize="15sp" />
+
         <!-- Decision log -->
         <LinearLayout
             android:layout_width="match_parent"
