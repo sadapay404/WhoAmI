@@ -1,0 +1,59 @@
+name: Probe signing keys
+# One-off diagnostic: is the signing key stable across builds?
+# (GitHub runners usually generate a fresh random debug keystore per run,
+# which would make every published APK un-installable over the previous one.)
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Image pre-baked debug keystore?
+        run: |
+          if [ -f "$HOME/.android/debug.keystore" ]; then
+            echo "::notice title=image-keystore::PREBAKED=YES"
+            keytool -list -v -keystore "$HOME/.android/debug.keystore" -storepass android 2>/dev/null | grep -E "SHA256:|Alias name" | head -4 | while read -r l; do
+              echo "::notice title=image-keystore::$l"
+            done
+            mkdir -p out && cp "$HOME/.android/debug.keystore" out/image-debug.keystore
+          else
+            echo "::notice title=image-keystore::PREBAKED=NO (runner generates a new random key each build)"
+          fi
+
+      - name: Fingerprint published APKs
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p apks
+          # Three points in time: oldest debug, newest debug, v1.0 release.
+          curl -sL -o apks/old.apk "https://github.com/sadapay404/WhoAmI/releases/download/latest-build/WhoAmI-4e7d5dc.apk" || true
+          curl -sL -o apks/latest.apk "https://github.com/sadapay404/WhoAmI/releases/download/latest-build/WhoAmI-latest.apk" || true
+          curl -sL -o apks/v1.apk "https://github.com/sadapay404/WhoAmI/releases/download/v1.0/WhoAmI-v1.0.apk" || true
+          for f in old latest v1; do
+            file="apks/$f.apk"
+            [ -s "$file" ] || { echo "::notice title=cert-$f::download failed"; continue; }
+            out=$(keytool -printcert -jarfile "$file" 2>/dev/null | grep -E "SHA256:|Owner:" | tr '\n' ' ')
+            if [ -z "$out" ]; then
+              # v2/v3-only APK fallback: apksigner from the preinstalled Android SDK
+              APKSIGNER=$(find /usr/local/lib/android/sdk/build-tools -name apksigner 2>/dev/null | sort | tail -1)
+              [ -n "$APKSIGNER" ] && out=$("$APKSIGNER" verify --print-certs "$file" 2>/dev/null | grep -E "SHA-256 digest|Signer #1 certificate DN" | tr '\n' ' ')
+            fi
+            echo "::notice title=cert-$f::${out:-could not read signer}"
+          done
+
+      - name: Upload image keystore if present
+        if: hashFiles('out/image-debug.keystore') != ''
+        uses: actions/upload-artifact@v4
+        with:
+          name: image-debug-keystore
+          path: out/image-debug.keystore
