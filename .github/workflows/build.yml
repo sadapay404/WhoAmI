@@ -24,8 +24,28 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
+      # Build; on failure, re-emit every error line as a workflow annotation
+      # so they're readable through the GitHub API (sandbox can't fetch raw logs).
       - name: Build debug APK
-        run: ./gradlew assembleDebug --no-daemon
+        run: |
+          set +e
+          ./gradlew assembleDebug --no-daemon 2>&1 | tee build-output.txt
+          status=${PIPESTATUS[0]}
+          if [ "$status" -ne 0 ]; then
+            echo "::group::Error lines"
+            grep -nE "(^e: |error: |ERROR: |FAILURE:|Execution failed|Unresolved reference|Could not resolve|Could not find|A problem occurred|BUILD FAILED|Caused by:|Exception)" build-output.txt | tail -60 | sed 's/^/  /'
+            echo "::endgroup::"
+            grep -E "(^e: |error: |ERROR: |FAILURE:|Execution failed for task|Could not resolve|Could not find|A problem occurred|Caused by:)" build-output.txt | tail -30 | sed 's/::/%25::/g' | while IFS= read -r line; do
+              echo "::error::${line}"
+            done
+            if ! grep -qE "(^e: |error: |ERROR: )" build-output.txt; then
+              echo "::error::Gradle failed with exit $status. Last lines:"
+              tail -25 build-output.txt | sed 's/::/%25::/g' | while IFS= read -r line; do
+                echo "::error::${line}"
+              done
+            fi
+          fi
+          exit $status
 
       - name: Name APK with short SHA
         run: |
