@@ -18,6 +18,9 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
+            // Personal sideload app: sign release with the debug keystore so the
+            // APK is installable and upgrade-compatible with debug builds.
+            signingConfig = signingConfigs.getByName("debug")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

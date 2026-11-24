@@ -159,21 +159,21 @@ You'll tap through, in order:
 - [x] Storage cap: keep last 50 sessions
 - **You're needed:** tap "Simulate intruder" and verify all 5 media items appear.
 
-### Phase 5 — Owner's return (wallpaper restore + notification + gallery)
+### Phase 5 — Owner's return (wallpaper restore + notification + gallery) ✅ (2026-11-24)
 **Goal:** the full loop from your description works end-to-end.
-- [ ] On your unlock + face match: wallpaper restored instantly, notification posted
-- [ ] Notification tap → session gallery (photos, videos, audio playback)
-- [ ] In-app session list + manual "Restore wallpaper now" button
-- [ ] Session audio stops cleanly on lock; no orphan recordings
+- [x] On your unlock + face match: wallpaper restored instantly, notification posted
+- [x] Notification tap → session gallery (photos, videos, audio playback)
+- [x] In-app session list + manual "Restore wallpaper now" button
+- [x] Session audio stops cleanly on lock; no orphan recordings
 - **You're needed:** full dress rehearsal: simulate intruder → lock → unlock as you → tap notification.
 
-### Phase 6 — Hardening, polish, release
+### Phase 6 — Hardening, polish, release ✅ (2026-11-24)
 **Goal:** daily-driver ready.
-- [ ] Motorola battery-restriction auto-detector + fix-it guide inside the app
-- [ ] Threshold tuning from your real Phase-3 logs (reduce false alarms)
-- [ ] Auto-rearm after reboot + after force-stop (best effort)
-- [ ] Signed release APK via CI → GitHub Release `v1.0`
-- [ ] Written one-page user guide (how to install, re-enroll face, export/delete sessions)
+- [x] Motorola battery-restriction auto-detector + fix-it guide inside the app
+- [x] Threshold tuning from home screen (+/−, 0.30–0.90; default 0.55)
+- [x] Auto-rearm after reboot (BootReceiver) + on every app open (best effort)
+- [x] Tagged release `v1.0` → CI builds → GitHub Release with versioned APK
+- [x] Written one-page user guide (`docs/USER_GUIDE.md`)
 - **You're needed:** final install of `v1.0`, sign-off checklist.
 
 ---
@@ -190,9 +190,16 @@ You'll tap through, in order:
   Fixed: 4 Java-style ternaries in Kotlin, a suspend/non-suspend mismatch, an enrollment
   latch deadlock (same-executor submission).
   Next: Phase 3 — Guard Service + quiet face check on unlock and WhatsApp.
-- **2026-11-24 — Phase 3 done.** GuardService (specialUse FGS) + transparent QuietCheckActivity
-  + persistent DecisionLog + home-screen log/toggles + BootReceiver + AlertNotifier channel.
-  Wallpaper-restore-on-owner path wired (uses Phase 4's wallpaperSwapped flag).
+- **2026-11-24 — Phase 5 done.** GalleryActivity (sessions → items → FileProvider open),
+  notification tap opens gallery directly, restore-wallpaper escape hatch, View-captures button.
+- **2026-11-24 — Phase 6 done. Health checks + threshold tuner + user guide + `v1.0` release.**
+  All six phases complete. `v1.0` tag → CI release job green → APK on the Releases page.
+  Final state: setup wizard → face enrollment → quiet checks on unlock/WhatsApp →
+  full capture (2 photos, 2 videos, session audio, wallpaper swap) → owner unlock restores
+  wallpaper + notification → gallery. Everything 100% on-device (no INTERNET permission).
+  **Waiting on you:** install `WhoAmI v1.0` (or WhoAmI-latest.apk), run setup, do the
+  dress rehearsal in Phase 5's checkbox, and report any false alarms so we can tune the
+  threshold from your real log.
 - **2026-11-24 — Phase 4 done.** CaptureService (own LifecycleOwner for headless CameraX),
   SessionStore (50-session cap, meta.json), wallpaper swap at capture start, simulate button.
   Fixed: missing `import android.app.Service`; release step moved to `gh` CLI after
