@@ -54,6 +54,47 @@
                 android:text="" />
         </LinearLayout>
 
+        <!-- Settings -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:background="#14FFFFFF">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="SETTINGS"
+                android:textSize="12sp"
+                android:letterSpacing="0.15"
+                android:textColor="#E94560"
+                android:textStyle="bold" />
+
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/switchWhatsapp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Check face when WhatsApp opens"
+                android:textSize="14sp" />
+
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/switchUncertain"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Capture even when face is unclear (strict)"
+                android:textSize="14sp" />
+
+            <com.google.android.material.materialswitch.MaterialSwitch
+                android:id="@+id/switchArmed"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Protection armed"
+                android:textSize="14sp" />
+        </LinearLayout>
+
         <Button
             android:id="@+id/btnTestCheck"
             android:layout_width="match_parent"
@@ -80,11 +121,61 @@
             android:text="Re-save wallpaper"
             android:textSize="15sp" />
 
+        <!-- Decision log -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:background="#14FFFFFF">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="RECENT CHECKS"
+                    android:textSize="12sp"
+                    android:letterSpacing="0.15"
+                    android:textColor="#E94560"
+                    android:textStyle="bold" />
+
+                <Button
+                    android:id="@+id/btnClearLog"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:minHeight="0dp"
+                    android:minWidth="0dp"
+                    android:padding="4dp"
+                    android:backgroundTint="#00000000"
+                    android:text="Clear"
+                    android:textSize="12sp"
+                    android:textColor="#80FFFFFF" />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/logView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:fontFamily="monospace"
+                android:textSize="11sp"
+                android:lineSpacingMultiplier="1.4"
+                android:text="No checks yet"
+                android:maxLines="14"
+                android:ellipsize="start" />
+        </LinearLayout>
+
         <TextView
             android:id="@+id/homeNote"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="20dp"
             android:textSize="13sp"
             android:textColor="#80FFFFFF"
             android:lineSpacingMultiplier="1.4"

@@ -46,6 +46,16 @@ class AppPrefs(context: Context) {
         get() = prefs.getInt(KEY_SAMPLE_COUNT, 0)
         set(value) = prefs.edit().putInt(KEY_SAMPLE_COUNT, value).apply()
 
+    /** True while the intruder's photo is set as wallpaper (Phase 4+). */
+    var wallpaperSwapped: Boolean
+        get() = prefs.getBoolean(KEY_WALLPAPER_SWAPPED, false)
+        set(value) = prefs.edit().putBoolean(KEY_WALLPAPER_SWAPPED, value).apply()
+
+    /** Protection on/off master switch. */
+    var protectionArmed: Boolean
+        get() = prefs.getBoolean(KEY_PROTECTION_ARMED, true)
+        set(value) = prefs.edit().putBoolean(KEY_PROTECTION_ARMED, value).apply()
+
     companion object {
         const val POLICY_ALLOW = "allow"
         const val POLICY_CAPTURE = "capture"
@@ -58,5 +68,7 @@ class AppPrefs(context: Context) {
         private const val KEY_WHATSAPP_CHECK = "whatsapp_check"
         private const val KEY_THRESHOLD = "match_threshold"
         private const val KEY_SAMPLE_COUNT = "sample_count"
+        private const val KEY_WALLPAPER_SWAPPED = "wallpaper_swapped"
+        private const val KEY_PROTECTION_ARMED = "protection_armed"
     }
 }

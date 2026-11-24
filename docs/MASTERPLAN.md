@@ -133,13 +133,13 @@ You'll tap through, in order:
 - **You're needed:** download the APK, install it, confirm it opens. (Everything else can proceed without you.)
 - **APK:** https://github.com/sadapay404/WhoAmI/releases/tag/latest-build (`WhoAmI-latest.apk`, ~12.6 MB)
 
-### Phase 2 — Setup wizard + permissions + face enrollment
+### Phase 2 — Setup wizard + permissions + face enrollment ✅ (2026-11-24)
 **Goal:** app is fully configured on your phone and knows your face.
-- [ ] Step-by-step setup screen with all 8 steps from §3
-- [ ] Deep-links to the exact Motorola settings screens for overlay / usage / battery
-- [ ] Face enrollment (multi-angle capture → face print saved privately)
-- [ ] Current wallpaper backed up as "default"
-- [ ] "Test face check" button (runs the check and tells you MATCH / NO MATCH on screen)
+- [x] Step-by-step setup screen with all steps from §3
+- [x] Deep-links to the exact settings screens for overlay / usage / battery
+- [x] Face enrollment (multi-angle capture → face print saved privately)
+- [x] Current wallpaper backed up as "default"
+- [x] "Test face check" button (runs the check and tells you MATCH / NO MATCH + score)
 - **You're needed:** run setup on the phone, enroll your face, tap Test a few times (daylight + a dark room).
 
 ### Phase 3 — Detection engine
@@ -184,7 +184,12 @@ You'll tap through, in order:
 
 - **2026-11-24 — Plan created.** Architecture locked per §2–§3. Starting Phase 1.
 - **2026-11-24 — Phase 1 done.** First CI build green (2m15s). APK attached to release `latest-build`.
-  Next: Phase 2 — setup wizard, permissions, face enrollment.
+- **2026-11-24 — Phase 2 done.** Setup wizard, FaceEngine (ML Kit + MobileFaceNet, fully offline),
+  enrollment, wallpaper backup, test-check screen. Debugging notes: CI logs host is blocked from
+  this sandbox — build errors now surface as workflow annotations (readable via API).
+  Fixed: 4 Java-style ternaries in Kotlin, a suspend/non-suspend mismatch, an enrollment
+  latch deadlock (same-executor submission).
+  Next: Phase 3 — Guard Service + quiet face check on unlock and WhatsApp.
 
 ---
 

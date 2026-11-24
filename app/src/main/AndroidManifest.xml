@@ -14,6 +14,7 @@
 
     <!-- Quiet face-check at unlock requires popping up from the background -->
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
     <!-- Notice when WhatsApp comes to the front -->
     <uses-permission
@@ -58,6 +59,35 @@
             android:name=".setup.TestCheckActivity"
             android:exported="false"
             android:screenOrientation="portrait" />
+
+        <!-- Transparent one-shot face check, launched by the guard -->
+        <activity
+            android:name=".setup.QuietCheckActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:launchMode="singleInstance"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.WhoAmI.Quiet" />
+
+        <!-- Always-on watcher -->
+        <service
+            android:name=".guard.GuardService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Listens for device unlock and WhatsApp foreground events to run an on-device face check for the phone owner's security." />
+        </service>
+
+        <!-- Re-arm after reboot -->
+        <receiver
+            android:name=".guard.BootReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
